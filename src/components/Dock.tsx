@@ -21,7 +21,9 @@ interface Props {
 export function Dock({ tab, onTab, demo, busy, onSync }: Props) {
   // On Home (or Settings) the blob glides into the centre and shrinks away behind
   // the Home button, then grows back out of it, instead of sliding off the side.
-  const slot = SLOT[tab]
+  // While on demo data the right-hand slot is Connect, which opens Settings,
+  // so Settings gets the highlight there too.
+  const slot = tab === 'settings' && demo ? 4 : SLOT[tab]
   const hidden = slot === undefined
   const blobStyle = {
     transform: `translateX(${(hidden ? 2 : slot) * 100}%) scale(${hidden ? 0.35 : 1})`,
@@ -59,7 +61,11 @@ export function Dock({ tab, onTab, demo, busy, onSync }: Props) {
       </button>
       {item('heart', 'Heart', HeartPulse)}
       {demo ? (
-        <button className={`dock-item ${tab === 'settings' ? 'current' : ''}`} onClick={() => onTab('settings')}>
+        <button
+          className={`dock-item ${tab === 'settings' ? 'active' : ''}`}
+          onClick={() => onTab('settings')}
+          aria-current={tab === 'settings' ? 'page' : undefined}
+        >
           <Link2 size={21} strokeWidth={2.2} aria-hidden />
           <span>Connect</span>
         </button>
