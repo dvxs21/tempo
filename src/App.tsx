@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
+import { AlertCircle, RefreshCw, Sparkles } from 'lucide-react'
+import { Landscape } from './components/Landscape'
+import { Equalizer } from './components/ui'
 import { WorkoutList } from './components/WorkoutList'
 import { WorkoutDetail } from './components/WorkoutDetail'
 import { SongRanking } from './components/SongRanking'
@@ -83,8 +86,9 @@ export default function App() {
 
   return (
     <div className="app">
+      <Landscape />
       <header className="top">
-        <div className="logo">Tempo</div>
+        <div className="logo"><Equalizer />Tempo</div>
         <nav className="tabs">
           {TABS.map(([id, label]) => (
             <button key={id} className={`tab ${tab === id ? 'active' : ''}`} onClick={() => { setTab(id); setOpenId(null) }}>
@@ -94,6 +98,7 @@ export default function App() {
         </nav>
         {!demo && (
           <button className="btn" onClick={sync} disabled={busy}>
+            <RefreshCw size={16} strokeWidth={2.4} className={busy ? 'spin' : ''} aria-hidden />
             {busy ? 'Syncing…' : 'Sync'}
           </button>
         )}
@@ -101,12 +106,14 @@ export default function App() {
 
       {demo && (
         <div className="banner">
-          You're looking at <b>demo data</b>. Connect your accounts in Settings to see your own workouts.
+          <Sparkles size={18} aria-hidden />
+          <span>You're looking at <b>demo data</b>. Connect your accounts in Settings to see your own workouts.</span>
         </div>
       )}
-      {error && <div className="error" role="alert">{error}</div>}
-      {message && <div className="banner" role="status">{message}</div>}
+      {error && <div className="error" role="alert"><AlertCircle size={18} aria-hidden />{error}</div>}
+      {message && <div className="banner" role="status"><Sparkles size={18} aria-hidden />{message}</div>}
 
+      <main className="view" key={`${tab}-${openId ?? ''}-${demo}`}>
       {tab === 'workouts' &&
         (open ? (
           <WorkoutDetail workout={open} plays={data.plays} units={settings.units} onBack={() => setOpenId(null)} />
@@ -125,6 +132,7 @@ export default function App() {
           onChanged={refresh}
         />
       )}
+      </main>
     </div>
   )
 }

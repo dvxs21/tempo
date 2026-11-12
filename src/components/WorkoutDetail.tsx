@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { ArrowLeft, Music2 } from 'lucide-react'
 import { segmentsFor } from '../lib/match'
 import {
   formatBpm,
@@ -22,7 +23,7 @@ import {
   usesPace,
 } from '../lib/format'
 import type { Play, Segment, Settings, Workout } from '../lib/types'
-import { DivergingBar, SongArt } from './ui'
+import { DivergingBar, SongArt, SportIcon } from './ui'
 
 interface Props {
   workout: Workout
@@ -76,7 +77,7 @@ export function WorkoutDetail({ workout: w, plays, units, onBack }: Props) {
       key={i}
       x1={s.fromSec / 60}
       x2={s.toSec / 60}
-      fill={hover === i ? 'var(--band-hi)' : i % 2 ? 'transparent' : 'var(--band)'}
+      fill={hover === i ? 'rgba(255, 45, 135, 0.28)' : i % 2 ? 'transparent' : 'rgba(255, 255, 255, 0.07)'}
       fillOpacity={1}
       ifOverflow="hidden"
     />
@@ -99,14 +100,14 @@ export function WorkoutDetail({ workout: w, plays, units, onBack }: Props) {
         <div className="tooltip">
           <b>{value}</b>
           <span className="muted">{formatDuration(p.sec)} in</span>
-          {seg && <div>♪ {seg.play.name}</div>}
+          {seg && <div className="now"><Music2 size={14} aria-hidden />{seg.play.name}</div>}
         </div>
       )
     }
 
   const axisProps = {
-    tick: { fill: 'var(--text-3)', fontSize: 12 },
-    stroke: 'var(--border)',
+    tick: { fill: '#a9d0f1', fontSize: 12 },
+    stroke: 'rgba(255, 255, 255, 0.25)',
   }
 
   const onMove = (e: { activeLabel?: string | number } | null) => {
@@ -117,11 +118,14 @@ export function WorkoutDetail({ workout: w, plays, units, onBack }: Props) {
 
   return (
     <div>
-      <button className="back" onClick={onBack}>← All workouts</button>
+      <button className="back" onClick={onBack}><ArrowLeft size={16} strokeWidth={2.4} aria-hidden />All workouts</button>
       <div className="card">
-        <div className="small muted">{formatDate(w.start)} · {sportLabel[w.sport]}</div>
         <h2>{w.name}</h2>
-        <div className="stats" style={{ marginTop: 8 }}>
+        <div className="meta">
+          <span className="date">{formatDate(w.start)}</span>
+          <span className="pill"><SportIcon sport={w.sport} />{sportLabel[w.sport]}</span>
+        </div>
+        <div className="stats" style={{ marginTop: 16 }}>
           <div className="stat"><b>{formatDistance(w.distanceM, units)}</b><span>distance</span></div>
           <div className="stat"><b>{formatDuration(w.elapsedSec)}</b><span>time</span></div>
           <div className="stat"><b>{formatEffort(w.avgSpeed, w.sport, units)}</b><span>average</span></div>
@@ -130,38 +134,39 @@ export function WorkoutDetail({ workout: w, plays, units, onBack }: Props) {
         </div>
 
         <div className="chart-title">
+          <i aria-hidden />
           {pace ? `Pace (min/${units}, faster is higher)` : `Speed (${units === 'km' ? 'km/h' : 'mph'})`} · shaded stripes are songs
         </div>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={data} syncId="workout" margin={{ top: 8, right: 8, bottom: 0, left: -8 }} onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
-            <CartesianGrid stroke="var(--border)" vertical={false} />
+            <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" vertical={false} />
             {bands}
             <XAxis dataKey="min" type="number" domain={[0, w.elapsedSec / 60]} unit=" min" {...axisProps} tickFormatter={(m) => Math.round(m).toString()} />
             <YAxis reversed={pace} domain={['auto', 'auto']} width={44} {...axisProps} tickFormatter={(v) => (pace ? `${Math.floor(v)}:${String(Math.round((v % 1) * 60)).padStart(2, '0')}` : String(v))} />
-            <Tooltip content={tooltip('effort')} cursor={{ stroke: 'var(--text-3)' }} />
-            <Line dataKey="effort" stroke="var(--accent)" strokeWidth={2} dot={false} isAnimationActive={false} connectNulls={false} />
+            <Tooltip content={tooltip('effort')} cursor={{ stroke: '#ff9ccb', strokeWidth: 1.5 }} />
+            <Line dataKey="effort" stroke="#ffffff" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: '#ff2d87', stroke: '#fff', strokeWidth: 2 }} animationDuration={1400} animationEasing="ease-out" connectNulls={false} />
           </LineChart>
         </ResponsiveContainer>
 
         {hasHr && (
           <>
-            <div className="chart-title">Heart rate (bpm)</div>
+            <div className="chart-title"><i className="hr" aria-hidden />Heart rate (bpm)</div>
             <ResponsiveContainer width="100%" height={150}>
               <LineChart data={data} syncId="workout" margin={{ top: 8, right: 8, bottom: 0, left: -8 }} onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
-                <CartesianGrid stroke="var(--border)" vertical={false} />
+                <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" vertical={false} />
                 {bands}
                 <XAxis dataKey="min" type="number" domain={[0, w.elapsedSec / 60]} unit=" min" {...axisProps} tickFormatter={(m) => Math.round(m).toString()} />
                 <YAxis domain={['auto', 'auto']} width={44} {...axisProps} />
-                <Tooltip content={tooltip('hr')} cursor={{ stroke: 'var(--text-3)' }} />
-                <Line dataKey="hr" stroke="var(--hr)" strokeWidth={2} dot={false} isAnimationActive={false} />
+                <Tooltip content={tooltip('hr')} cursor={{ stroke: '#ff9ccb', strokeWidth: 1.5 }} />
+                <Line dataKey="hr" stroke="#ff5aa5" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: '#fff', stroke: '#ff2d87', strokeWidth: 2 }} animationDuration={1400} animationBegin={250} animationEasing="ease-out" />
               </LineChart>
             </ResponsiveContainer>
           </>
         )}
 
         <h3>Songs in this workout</h3>
-        <p className="small muted" style={{ marginTop: -4 }}>
-          Bar shows how much faster (blue) or slower (red) you went than your average for this workout.
+        <p className="lede" style={{ marginTop: 0 }}>
+          The bar shows how much faster (pink) or slower (pale blue) you went than your average for this workout.
         </p>
         <ul className="song-list">
           {segments.map((s: Segment, i) => (
@@ -172,8 +177,8 @@ export function WorkoutDetail({ workout: w, plays, units, onBack }: Props) {
                 <b>{s.play.name}</b>
                 <span>{s.warmup ? 'Warm-up · not counted in rankings' : s.play.artists}</span>
               </div>
-              <DivergingBar value={s.warmup ? 0 : s.relSpeed} max={maxRel} />
-              <div className="value">
+              <DivergingBar value={s.warmup ? 0 : s.relSpeed} max={maxRel} index={i} />
+              <div className={`value ${!s.warmup && s.relSpeed > 0 ? 'up' : ''}`}>
                 {s.warmup ? '–' : formatPct(s.relSpeed)}
                 <small>{formatEffort(s.avgSpeed, w.sport, units)}</small>
                 {s.relHr !== undefined && <small>{formatBpm(s.relHr)}</small>}

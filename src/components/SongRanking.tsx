@@ -3,6 +3,7 @@ import { formatBpm, formatPct } from '../lib/format'
 import { songStats, type SongStat } from '../lib/stats'
 import type { Play, Sport, Workout } from '../lib/types'
 import { DivergingBar, SongArt } from './ui'
+import { Flame, HeartPulse } from 'lucide-react'
 
 interface Props {
   workouts: Workout[]
@@ -25,8 +26,8 @@ export function SongRanking({ workouts, plays, mode }: Props) {
 
   return (
     <div className="card">
-      <h2>{heart ? 'Heart rate per song' : 'Power songs'}</h2>
-      <p className="small muted">
+      <h2 className="row" style={{ gap: 10 }}>{heart ? <HeartPulse color="#ff5aa5" aria-hidden /> : <Flame color="#ff5aa5" aria-hidden />}{heart ? 'Heart rate per song' : 'Power songs'}</h2>
+      <p className="lede">
         {heart
           ? 'How far above or below your workout average your heart rate sits during each song. Top songs pump you up, bottom songs calm you down.'
           : 'Songs ranked by how much faster you go than your average for that workout. Comparing against each workout\'s own average keeps easy and hard days fair.'}
@@ -57,14 +58,14 @@ export function SongRanking({ workouts, plays, mode }: Props) {
         <ul className="song-list">
           {list.map((s, i) => (
             <li key={s.trackId} className="song">
-              <span className="rank">{i + 1}</span>
+              <span className={`rank ${i < 3 && value(s) > 0 ? 'podium' : ''}`}>{i + 1}</span>
               <SongArt src={s.albumArt} name={s.name} />
               <div className="song-name">
                 <b>{s.name}</b>
                 <span>{s.artists}</span>
               </div>
-              <DivergingBar value={value(s)} max={max} />
-              <div className="value">
+              <DivergingBar value={value(s)} max={max} index={i} />
+              <div className={`value ${value(s) > 0 ? 'up' : ''}`}>
                 {heart ? formatBpm(value(s)) : formatPct(value(s))}
                 <small>
                   {s.count} play{s.count === 1 ? '' : 's'}

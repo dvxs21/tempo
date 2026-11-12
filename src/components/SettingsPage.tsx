@@ -36,8 +36,8 @@ export function SettingsPage({ settings, setSettings, demo, setDemo, onError, on
   }
 
   return (
-    <div>
-      <div className="card">
+    <div className="stagger">
+      <div className="card" style={{ '--i': 0 } as React.CSSProperties}>
         <h2>General</h2>
         <label className="field">
           <span>Units</span>
@@ -52,9 +52,9 @@ export function SettingsPage({ settings, setSettings, demo, setDemo, onError, on
         </label>
       </div>
 
-      <div className="card">
+      <div className="card" style={{ '--i': 1 } as React.CSSProperties}>
         <h2>Spotify {spotifyOn && <span className="pill">Connected</span>}</h2>
-        <p className="small muted">Spotify only remembers your last 50 songs, so open this app and press Sync after each workout.</p>
+        <p className="lede">Spotify only remembers your last 50 songs, so open this app and press Sync after each workout.</p>
         <details>
           <summary className="small">One-time setup (about 3 minutes)</summary>
           <ol className="steps small">
@@ -77,9 +77,9 @@ export function SettingsPage({ settings, setSettings, demo, setDemo, onError, on
         </div>
       </div>
 
-      <div className="card">
+      <div className="card" style={{ '--i': 2 } as React.CSSProperties}>
         <h2>Strava {stravaOn && <span className="pill">Connected</span>}</h2>
-        <p className="small muted">
+        <p className="lede">
           Apple Watch workouts can come in through Strava too: in the Strava app, go to Settings → Applications, Services and Devices → Health, and turn on syncing.
         </p>
         <details>
@@ -90,7 +90,7 @@ export function SettingsPage({ settings, setSettings, demo, setDemo, onError, on
             <li>Set <b>Authorization Callback Domain</b> to: <code>{host}</code></li>
             <li>Copy the <b>Client ID</b> and <b>Client Secret</b> into the boxes below.</li>
           </ol>
-          <p className="small muted">The secret stays in this browser only. It's your own private Strava app, so this is fine for personal use.</p>
+          <p className="lede">The secret stays in this browser only. It's your own private Strava app, so this is fine for personal use.</p>
         </details>
         <label className="field">
           <span>Strava Client ID</span>
@@ -109,9 +109,9 @@ export function SettingsPage({ settings, setSettings, demo, setDemo, onError, on
         </div>
       </div>
 
-      <div className="card">
+      <div className="card" style={{ '--i': 3 } as React.CSSProperties}>
         <h2>Your data</h2>
-        <p className="small muted">Everything is stored only in this browser. Clearing it removes saved songs and workouts (not your accounts).</p>
+        <p className="lede">Everything is stored only in this browser. Clearing it removes saved songs and workouts (not your accounts).</p>
         <button
           className="btn secondary"
           onClick={() => {
