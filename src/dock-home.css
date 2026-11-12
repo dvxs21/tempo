@@ -67,22 +67,12 @@
   box-shadow: 0 10px 22px -10px rgba(3, 25, 60, 0.8);
   transition: transform 0.3s var(--ease-out), background-color 0.2s;
 }
-.dock-action:hover:not(:disabled) { background: var(--pink-deep); }
-.dock-action:active:not(:disabled) { transform: scale(0.94); }
-.dock-action:disabled { cursor: default; }
-.dock-action::before,
-.dock-action::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 2px solid var(--pink);
-  opacity: 0;
-  pointer-events: none;
-}
-.dock-action.invite::before { animation: ring 2.8s var(--ease-out) 1.5s 3; }
-.dock-action.invite::after { animation: ring 2.8s var(--ease-out) 2.9s 3; }
-@keyframes ring { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.7); opacity: 0; } }
+.dock-action:hover { background: var(--pink-deep); }
+.dock-action:active { transform: scale(0.94); }
+/* On Home the centre button turns white, like the blob behind the other tabs. */
+.dock-action.active { background: #fff; color: var(--pink-deep); border-color: var(--pink); }
+.dock-action.active svg { animation: icon-pop 0.6s var(--ease-out); }
+.dock-item:disabled { cursor: default; opacity: 0.7; }
 
 /* ---------- Home ---------- */
 .hello { padding: 18px 6px 10px; }
