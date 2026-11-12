@@ -65,7 +65,8 @@
   color: #fff;
   cursor: pointer;
   box-shadow: 0 10px 22px -10px rgba(3, 25, 60, 0.8);
-  transition: transform 0.3s var(--ease-out), background-color 0.2s;
+  /* colours swap instantly: a cross-fade would blend the icon into the background mid-switch */
+  transition: transform 0.3s var(--ease-out);
 }
 .dock-action:hover { background: var(--pink-deep); }
 .dock-action:active { transform: scale(0.94); }
@@ -82,9 +83,13 @@
   font-weight: 780;
   letter-spacing: -0.035em;
   line-height: 1.02;
-  text-shadow: 0 6px 30px rgba(6, 42, 82, 0.35);
+  /* Clouds drift behind this text: a tight edge plus a soft deep-blue glow keeps it readable on white. */
+  text-shadow: 0 1px 2px rgba(6, 42, 82, 0.8), 0 0 4px rgba(6, 42, 82, 0.6), 0 4px 18px rgba(6, 42, 82, 0.55), 0 8px 40px rgba(6, 42, 82, 0.35);
 }
-.tally { font-size: 1.12rem; color: #fff; margin: 14px 0 10px; max-width: 46ch; line-height: 1.9; text-shadow: 0 2px 14px rgba(6, 42, 82, 0.45); }
+.tally { font-size: 1.12rem; color: #fff; margin: 14px 0 10px; max-width: 46ch; line-height: 1.9; text-shadow: 0 1px 1px rgba(6, 42, 82, 0.95), 0 0 3px rgba(6, 42, 82, 0.9), 0 2px 8px rgba(6, 42, 82, 0.75), 0 4px 22px rgba(6, 42, 82, 0.5); font-weight: 560; }
+.hello .lede { color: #fff; font-weight: 560; text-shadow: 0 1px 1px rgba(6, 42, 82, 0.95), 0 0 3px rgba(6, 42, 82, 0.9), 0 2px 8px rgba(6, 42, 82, 0.75); }
+/* Pink on a white cloud is too faint, so the hero highlight uses the stronger pink. */
+.hello h1 .hot { color: #ff6fb0; }
 .tally b { font-weight: 750; font-variant-numeric: tabular-nums; }
 .home .card { display: block; width: 100%; text-align: left; color: inherit; cursor: pointer; transition: transform 0.45s var(--ease-out), border-color 0.3s; }
 .home .card:hover { border-color: rgba(255, 255, 255, 0.32); background: rgba(10, 62, 122, 0.95); }
