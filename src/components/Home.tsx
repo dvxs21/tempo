@@ -23,8 +23,8 @@ export function Home({ workouts, plays, units, onOpenWorkout, onGo }: Props) {
       <div className="stagger">
         <section className="hello" style={{ '--i': 0 } as React.CSSProperties}>
           <h1>Which songs make you faster?</h1>
-          <p className="lede">Connect your music and Strava, go for a workout with music on, and Tempo lines each song up with your pace.</p>
-          <button className="btn pink" onClick={() => onGo('settings')}>Connect Spotify and Strava</button>
+          <p className="lede">Add your Apple Music or Spotify history and your Strava workouts, and Tempo lines each song up with your pace.</p>
+          <button className="btn pink" onClick={() => onGo('settings')}>Connect your music and Strava</button>
         </section>
       </div>
     )

@@ -24,14 +24,14 @@ export interface Workout {
   samples?: Samples
 }
 
-/** One play of a song, as reported by the music service. */
+/** One play of a song, from Spotify or an Apple Music export. */
 export interface Play {
   trackId: string
   name: string
   artists: string
   durationMs: number
   albumArt?: string
-  /** When Spotify logged the play (ms since epoch). Spotify logs this when the song ends or is skipped. */
+  /** When the song ended or was skipped (ms since epoch). */
   playedAt: number
 }
 

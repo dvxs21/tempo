@@ -1,7 +1,7 @@
 import type { Play, Settings, Workout } from './types'
 
 // Everything lives in this browser's localStorage. Nothing is sent anywhere except
-// Spotify and Strava themselves.
+// Spotify and Strava themselves. Apple Music exports are read on the device.
 
 const PREFIX = 'tempo:'
 

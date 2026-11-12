@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { AlertCircle, CheckCircle2, Settings2 } from 'lucide-react'
 import { Landscape } from './components/Landscape'
 import { Equalizer } from './components/ui'
 import { Dock, type Tab } from './components/Dock'
 import { Home } from './components/Home'
 import { WorkoutList } from './components/WorkoutList'
-import { WorkoutDetail } from './components/WorkoutDetail'
+// Charts are the heaviest part of the app, so they load only when a workout is opened.
+const WorkoutDetail = lazy(() => import('./components/WorkoutDetail').then((m) => ({ default: m.WorkoutDetail })))
 import { SongRanking } from './components/SongRanking'
 import { SettingsPage } from './components/SettingsPage'
 import { demoData } from './lib/demo'
@@ -60,7 +61,7 @@ export default function App() {
     [demo, version],
   )
 
-  const sync = async () => {
+  const sync = async (prefix?: string) => {
     setBusy(true)
     setError(null)
     setMessage(null)
@@ -68,7 +69,10 @@ export default function App() {
       const parts: string[] = []
       if (isSpotifyConnected()) parts.push(`${await syncSpotify()} new songs`)
       if (isStravaConnected()) parts.push(`${await syncStrava()} workouts with music`)
-      setMessage(parts.length ? `Synced: ${parts.join(', ')}.` : 'Connect Spotify and Strava in Settings first.')
+      setMessage(
+        (prefix ? prefix + ' ' : '') +
+          (parts.length ? `Synced: ${parts.join(', ')}.` : 'Connect your music and Strava in Settings first.'),
+      )
       refresh()
     } catch (e) {
       setError((e as Error).message)
@@ -114,7 +118,9 @@ export default function App() {
       )}
       {tab === 'workouts' &&
         (open ? (
-          <WorkoutDetail workout={open} plays={data.plays} units={settings.units} onBack={() => setOpenId(null)} />
+          <Suspense fallback={<div className="card loading" aria-busy="true">Loading workout…</div>}>
+            <WorkoutDetail workout={open} plays={data.plays} units={settings.units} onBack={() => setOpenId(null)} />
+          </Suspense>
         ) : (
           <WorkoutList workouts={data.workouts} plays={data.plays} units={settings.units} onOpen={setOpenId} />
         ))}
@@ -128,10 +134,17 @@ export default function App() {
           setDemo={setDemo}
           onError={setError}
           onChanged={refresh}
+          onImported={(msg) => {
+            setDemo(false)
+            setMessage(isStravaConnected() ? msg : `${msg} Connect Strava to line them up with your workouts.`)
+            refresh()
+            // Fetch pace data for workouts that now have music.
+            if (isStravaConnected()) sync(msg)
+          }}
         />
       )}
       </main>
-      <Dock tab={tab} onTab={go} demo={demo} busy={busy} onSync={sync} />
+      <Dock tab={tab} onTab={go} demo={demo} busy={busy} onSync={() => sync()} />
     </div>
   )
 }

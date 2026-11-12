@@ -11,10 +11,30 @@ interface Props {
   setDemo: (d: boolean) => void
   onError: (msg: string) => void
   onChanged: () => void
+  onImported: (msg: string) => void
 }
 
-export function SettingsPage({ settings, setSettings, demo, setDemo, onError, onChanged }: Props) {
+export function SettingsPage({ settings, setSettings, demo, setDemo, onError, onChanged, onImported }: Props) {
   const [draft, setDraft] = useState(settings)
+  const [importing, setImporting] = useState(false)
+  const importFile = async (file: File | undefined) => {
+    if (!file) return
+    setImporting(true)
+    try {
+      // The zip reader only downloads when someone imports a file.
+      const { importAppleMusic } = await import('../lib/applemusic')
+      const r = await importAppleMusic(file)
+      onImported(
+        r.added
+          ? `Imported ${r.added} Apple Music plays${r.kept < r.found ? ` (of ${r.found}, keeping only ones near your workouts)` : ''}.`
+          : `No new plays: all ${r.kept} were already saved.`,
+      )
+    } catch (e) {
+      onError((e as Error).message)
+    } finally {
+      setImporting(false)
+    }
+  }
   const update = (patch: Partial<Settings>) => {
     const next = { ...draft, ...patch }
     setDraft(next)
@@ -53,6 +73,24 @@ export function SettingsPage({ settings, setSettings, demo, setDemo, onError, on
       </div>
 
       <div className="card" style={{ '--i': 1 } as React.CSSProperties}>
+        <h2>Apple Music</h2>
+        <p className="lede">Apple doesn't let web apps read your listening history directly, but you can download it from Apple and drop the file in here.</p>
+        <details>
+          <summary className="small">How to get the file (Apple takes a few days)</summary>
+          <ol className="steps small">
+            <li>Go to <a href="https://privacy.apple.com" target="_blank" rel="noreferrer">privacy.apple.com</a>, sign in, and choose <b>Request a copy of your data</b>.</li>
+            <li>Tick <b>Apple Media Services information</b> and submit.</li>
+            <li>When Apple emails you, download the zip. Choose it below as it is, or unzip it and pick <b>Apple Music Play Activity.csv</b>.</li>
+          </ol>
+          <p className="lede">The file is read on this device. Nothing is uploaded.</p>
+        </details>
+        <label className={`btn file-btn ${importing ? 'busy' : ''}`}>
+          <input type="file" accept=".csv,.zip,text/csv,application/zip" disabled={importing} onChange={(e) => { importFile(e.target.files?.[0]); e.target.value = '' }} />
+          {importing ? 'Reading your history…' : 'Choose Apple Music file'}
+        </label>
+      </div>
+
+      <div className="card" style={{ '--i': 2 } as React.CSSProperties}>
         <h2>Spotify {spotifyOn && <span className="pill">Connected</span>}</h2>
         <p className="lede">Spotify only remembers your last 50 songs, so open this app and press Sync after each workout.</p>
         <details>
@@ -77,7 +115,7 @@ export function SettingsPage({ settings, setSettings, demo, setDemo, onError, on
         </div>
       </div>
 
-      <div className="card" style={{ '--i': 2 } as React.CSSProperties}>
+      <div className="card" style={{ '--i': 3 } as React.CSSProperties}>
         <h2>Strava {stravaOn && <span className="pill">Connected</span>}</h2>
         <p className="lede">
           Apple Watch workouts can come in through Strava too: in the Strava app, go to Settings → Applications, Services and Devices → Health, and turn on syncing.
@@ -109,7 +147,7 @@ export function SettingsPage({ settings, setSettings, demo, setDemo, onError, on
         </div>
       </div>
 
-      <div className="card" style={{ '--i': 3 } as React.CSSProperties}>
+      <div className="card" style={{ '--i': 4 } as React.CSSProperties}>
         <h2>Your data</h2>
         <p className="lede">Everything is stored only in this browser. Clearing it removes saved songs and workouts (not your accounts).</p>
         <button
