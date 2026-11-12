@@ -1,18 +1,43 @@
 import { useEffect } from 'react'
 
 /**
- * The fixed, layered sky-and-hills backdrop.
- * Far layers are pale and pink-hazed, near layers deep blue (atmospheric perspective).
- * Each layer drifts up at its own speed as the page scrolls (parallax), using one
- * --scroll custom property written from a single requestAnimationFrame loop.
+ * The fixed sky backdrop: you're above the clouds.
+ * Banks of cloud drift endlessly below (each its own speed), puffs float past, the
+ * horizon glows pink, and a pink contrail crosses the sky. Layers also drift up at
+ * different speeds as the page scrolls (parallax) via one --scroll custom property.
  */
 
 const reduced = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-// The winding running trail across the near hills, reused for the moving "runner" dot.
-const TRAIL =
-  'M-40 812 C 160 790, 260 744, 420 752 S 700 820, 880 790 S 1160 700, 1300 716 S 1460 760, 1500 752'
+function rng(seed: number) {
+  return () => {
+    seed = (seed * 16807) % 2147483647
+    return (seed - 1) / 2147483646
+  }
+}
+
+/**
+ * A scalloped cloud-bank outline, 1440 wide, repeated twice (2880) so it can drift
+ * left forever without a seam.
+ */
+function bank(seed: number, baseY: number, bumpW: number, amp: number) {
+  const r = rng(seed)
+  const bumps: [number, number][] = []
+  let x = 0
+  while (x < 1440) {
+    let w = bumpW * (0.6 + 0.8 * r())
+    if (1440 - x - w < bumpW * 0.5) w = 1440 - x
+    bumps.push([w, amp * (0.55 + 0.9 * r())])
+    x += w
+  }
+  let d = `M0 900 L0 ${baseY}`
+  for (let rep = 0; rep < 2; rep++)
+    for (const [w, h] of bumps) d += ` a ${w / 2} ${h} 0 0 1 ${w} 0`
+  return d + ' L2880 900 Z'
+}
+
+const CONTRAIL = 'M-60 520 C 220 470, 420 300, 720 280 S 1180 210, 1520 120'
 
 export function Landscape() {
   useEffect(() => {
@@ -38,23 +63,24 @@ export function Landscape() {
       <svg className="sky" viewBox="0 0 1440 900" preserveAspectRatio="none">
         <defs>
           <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#1a7fd4" />
-            <stop offset="0.32" stopColor="#3b9be6" />
-            <stop offset="0.58" stopColor="#7cc2f3" />
-            <stop offset="0.74" stopColor="#c7e7fb" />
-            <stop offset="0.88" stopColor="#ffd6ea" />
-            <stop offset="1" stopColor="#ffc4e0" />
+            <stop offset="0" stopColor="#1373cc" />
+            <stop offset="0.3" stopColor="#3a9be6" />
+            <stop offset="0.55" stopColor="#86c8f5" />
+            <stop offset="0.7" stopColor="#cfe9fc" />
+            <stop offset="0.8" stopColor="#ffd2e8" />
+            <stop offset="1" stopColor="#ffb8da" />
           </linearGradient>
         </defs>
         <rect width="1440" height="900" fill="url(#sky)" />
       </svg>
 
-      <Layer offset={0.02} rise={40}>
+      {/* sun + glow */}
+      <Layer offset={0.02} rise={30}>
         <defs>
           <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stopColor="#ffe3f0" stopOpacity="1" />
-            <stop offset="0.35" stopColor="#ff8cc4" stopOpacity="0.55" />
-            <stop offset="1" stopColor="#ff8cc4" stopOpacity="0" />
+            <stop offset="0" stopColor="#ffe6f2" />
+            <stop offset="0.3" stopColor="#ff7ab8" stopOpacity="0.55" />
+            <stop offset="1" stopColor="#ff7ab8" stopOpacity="0" />
           </radialGradient>
           <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#ffffff" />
@@ -62,117 +88,100 @@ export function Landscape() {
           </linearGradient>
         </defs>
         <g className="sun">
-          <circle cx="1060" cy="560" r="300" fill="url(#glow)" />
-          <circle cx="1060" cy="560" r="74" fill="url(#sun)" />
+          <circle cx="1080" cy="560" r="340" fill="url(#glow)" />
+          <circle cx="1080" cy="560" r="80" fill="url(#sun)" />
         </g>
       </Layer>
 
-      <Layer offset={0.03} rise={0} className="clouds">
-        <defs>
-          <filter id="soft" x="-20%" y="-50%" width="140%" height="200%">
-            <feGaussianBlur stdDeviation="10" />
-          </filter>
-        </defs>
-        <g className="cloud cloud-a" filter="url(#soft)" fill="#ffffff" opacity="0.55">
-          <ellipse cx="260" cy="210" rx="150" ry="34" />
-          <ellipse cx="330" cy="188" rx="90" ry="34" />
-        </g>
-        <g className="cloud cloud-b" filter="url(#soft)" fill="#ffffff" opacity="0.4">
-          <ellipse cx="900" cy="150" rx="190" ry="30" />
-          <ellipse cx="980" cy="132" rx="100" ry="30" />
-        </g>
-        <g className="cloud cloud-c" filter="url(#soft)" fill="#ffe6f2" opacity="0.45">
-          <ellipse cx="560" cy="330" rx="130" ry="22" />
-        </g>
-      </Layer>
-
-      <Layer offset={0.05} rise={60}>
-        <defs>
-          <linearGradient id="far" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#b3dbf8" />
-            <stop offset="1" stopColor="#f5d9ee" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M0 640 L120 580 L210 610 L330 520 L450 600 L560 560 L700 610 L820 540 L930 590 L1060 500 L1190 590 L1300 550 L1440 600 L1440 900 L0 900 Z"
-          fill="url(#far)"
-        />
-      </Layer>
-
-      <Layer offset={0.09} rise={80}>
-        <defs>
-          <linearGradient id="midfar" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#86c3f1" />
-            <stop offset="1" stopColor="#b8dcf6" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M0 700 C 180 640, 320 640, 480 680 S 780 720, 940 664 S 1240 620, 1440 670 L1440 900 L0 900 Z"
-          fill="url(#midfar)"
-        />
-      </Layer>
-
-      <Layer offset={0.14} rise={110}>
-        <defs>
-          <linearGradient id="mid" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#4fa2e6" />
-            <stop offset="1" stopColor="#7ab9ec" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M0 760 C 220 700, 380 690, 560 730 S 900 790, 1080 730 S 1340 690, 1440 712 L1440 900 L0 900 Z"
-          fill="url(#mid)"
-        />
-      </Layer>
-
-      <Layer offset={0.2} rise={140}>
-        <defs>
-          <linearGradient id="near" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#2a80d2" />
-            <stop offset="1" stopColor="#1a68b8" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M0 800 C 200 760, 300 730, 440 744 S 720 812, 900 784 S 1180 700, 1320 712 S 1420 740, 1440 744 L1440 900 L0 900 Z"
-          fill="url(#near)"
-        />
-        <path className="trail" d={TRAIL} fill="none" stroke="#ff2d87" strokeWidth="5" strokeLinecap="round" strokeDasharray="2 16" opacity="0.85" />
+      {/* pink contrail with a little plane-dot flying along it */}
+      <Layer offset={0.04} rise={0}>
+        <path className="contrail" d={CONTRAIL} fill="none" stroke="#ff2d87" strokeWidth="4" strokeLinecap="round" strokeDasharray="1 14" opacity="0.8" />
         {!still && (
-          <circle r="7" fill="#ff2d87" stroke="#ffffff" strokeWidth="3">
-            <animateMotion dur="38s" repeatCount="indefinite" path={TRAIL} />
-          </circle>
+          <g>
+            <circle r="6" fill="#ff2d87" stroke="#fff" strokeWidth="3">
+              <animateMotion dur="26s" repeatCount="indefinite" path={CONTRAIL} />
+            </circle>
+          </g>
         )}
       </Layer>
 
-      <Layer offset={0.28} rise={170}>
+      {/* floating puffs */}
+      <Layer offset={0.06} rise={0}>
         <defs>
-          <linearGradient id="front" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#0f5dac" />
-            <stop offset="1" stopColor="#093f7a" />
+          <filter id="soft" x="-30%" y="-60%" width="160%" height="220%">
+            <feGaussianBlur stdDeviation="4" />
+          </filter>
+          <linearGradient id="puff" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#ffffff" />
+            <stop offset="1" stopColor="#ffe1ef" />
           </linearGradient>
         </defs>
-        <path
-          d="M0 852 C 240 820, 420 812, 640 836 S 1040 872, 1240 836 S 1400 820, 1440 826 L1440 900 L0 900 Z"
-          fill="url(#front)"
-        />
+        <Puff x={180} y={170} s={1} cls="puff-a" />
+        <Puff x={760} y={110} s={0.7} cls="puff-b" />
+        <Puff x={1240} y={250} s={0.85} cls="puff-c" />
+        <Puff x={460} y={360} s={0.55} cls="puff-d" />
       </Layer>
+
+      {/* cloud banks, far to near; each drifts left on its own loop */}
+      <Bank offset={0.08} rise={60} speed="far" d={bank(7, 650, 150, 34)} top="#ffe9f4" bottom="#ffcbe4" />
+      <Bank offset={0.14} rise={90} speed="mid" d={bank(21, 720, 200, 48)} top="#ffffff" bottom="#d9ecfb" />
+      <Bank offset={0.2} rise={120} speed="near" d={bank(42, 790, 250, 60)} top="#ffffff" bottom="#e6f2fd" shade />
+      <Bank offset={0.28} rise={150} speed="front" d={bank(99, 850, 300, 56)} top="#ffffff" bottom="#f4f9ff" shade />
     </div>
   )
 }
 
-function Layer({
+function Puff({ x, y, s, cls }: { x: number; y: number; s: number; cls: string }) {
+  return (
+    <g className={`puff ${cls}`}>
+      <g transform={`translate(${x} ${y}) scale(${s})`} filter="url(#soft)" fill="url(#puff)">
+        <circle cx="0" cy="0" r="46" />
+        <circle cx="52" cy="-18" r="58" />
+        <circle cx="112" cy="-2" r="44" />
+        <circle cx="150" cy="14" r="30" />
+        <rect x="-30" y="0" width="210" height="44" rx="22" />
+      </g>
+    </g>
+  )
+}
+
+function Bank({
   offset,
   rise,
-  className = '',
-  children,
+  speed,
+  d,
+  top,
+  bottom,
+  shade,
 }: {
   offset: number
   rise: number
-  className?: string
-  children: React.ReactNode
+  speed: string
+  d: string
+  top: string
+  bottom: string
+  shade?: boolean
 }) {
+  const id = `bank-${speed}`
   return (
-    <div className={`layer ${className}`} style={{ '--offset': offset } as React.CSSProperties}>
+    <Layer offset={offset} rise={rise}>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={top} />
+          <stop offset="1" stopColor={bottom} />
+        </linearGradient>
+      </defs>
+      <g className={`bank bank-${speed}`}>
+        {shade && <path d={d} fill="#a9cdee" opacity="0.35" transform="translate(0 -6)" />}
+        <path d={d} fill={`url(#${id})`} />
+      </g>
+    </Layer>
+  )
+}
+
+function Layer({ offset, rise, children }: { offset: number; rise: number; children: React.ReactNode }) {
+  return (
+    <div className="layer" style={{ '--offset': offset } as React.CSSProperties}>
       <svg
         className="layer-art"
         viewBox="0 0 1440 900"

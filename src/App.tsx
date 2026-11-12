@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AlertCircle, RefreshCw, Sparkles } from 'lucide-react'
+import { AlertCircle, Settings2, Sparkles } from 'lucide-react'
 import { Landscape } from './components/Landscape'
 import { Equalizer } from './components/ui'
+import { Dock, type Tab } from './components/Dock'
+import { Home } from './components/Home'
 import { WorkoutList } from './components/WorkoutList'
 import { WorkoutDetail } from './components/WorkoutDetail'
 import { SongRanking } from './components/SongRanking'
@@ -11,16 +13,9 @@ import { getPlays, getSettings, getWorkouts, load, save } from './lib/storage'
 import { finishSpotifyLogin, isSpotifyConnected, syncSpotify } from './lib/spotify'
 import { finishStravaLogin, isStravaConnected, syncStrava } from './lib/strava'
 
-type Tab = 'workouts' | 'power' | 'heart' | 'settings'
-const TABS: [Tab, string][] = [
-  ['workouts', 'Workouts'],
-  ['power', 'Power songs'],
-  ['heart', 'Heart rate'],
-  ['settings', 'Settings'],
-]
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('workouts')
+  const [tab, setTab] = useState<Tab>('home')
   const [openId, setOpenId] = useState<string | null>(null)
   const [settings, setSettings] = useState(getSettings)
   const [demo, setDemoState] = useState(() => load('demo', !isSpotifyConnected() && !isStravaConnected()))
@@ -83,37 +78,40 @@ export default function App() {
   }
 
   const open = data.workouts.find((w) => w.id === openId)
+  const go = (t: Tab) => {
+    setTab(t)
+    setOpenId(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <div className="app">
       <Landscape />
       <header className="top">
-        <div className="logo"><Equalizer />Tempo</div>
-        <nav className="tabs">
-          {TABS.map(([id, label]) => (
-            <button key={id} className={`tab ${tab === id ? 'active' : ''}`} onClick={() => { setTab(id); setOpenId(null) }}>
-              {label}
-            </button>
-          ))}
-        </nav>
-        {!demo && (
-          <button className="btn" onClick={sync} disabled={busy}>
-            <RefreshCw size={16} strokeWidth={2.4} className={busy ? 'spin' : ''} aria-hidden />
-            {busy ? 'Syncing…' : 'Sync'}
+        <button className="logo" onClick={() => go('home')} aria-label="Tempo home"><Equalizer />Tempo</button>
+        {demo && (
+          <button className="chip" onClick={() => go('settings')} title="Connect your accounts to see your own workouts">
+            <Sparkles size={14} aria-hidden />Demo data
           </button>
         )}
+        <button className={`icon-btn ${tab === 'settings' ? 'active' : ''}`} onClick={() => go('settings')} aria-label="Settings">
+          <Settings2 size={20} strokeWidth={2.2} aria-hidden />
+        </button>
       </header>
 
-      {demo && (
-        <div className="banner">
-          <Sparkles size={18} aria-hidden />
-          <span>You're looking at <b>demo data</b>. Connect your accounts in Settings to see your own workouts.</span>
-        </div>
-      )}
       {error && <div className="error" role="alert"><AlertCircle size={18} aria-hidden />{error}</div>}
       {message && <div className="banner" role="status"><Sparkles size={18} aria-hidden />{message}</div>}
 
       <main className="view" key={`${tab}-${openId ?? ''}-${demo}`}>
+      {tab === 'home' && (
+        <Home
+          workouts={data.workouts}
+          plays={data.plays}
+          units={settings.units}
+          onOpenWorkout={(id) => { setTab('workouts'); setOpenId(id) }}
+          onGo={go}
+        />
+      )}
       {tab === 'workouts' &&
         (open ? (
           <WorkoutDetail workout={open} plays={data.plays} units={settings.units} onBack={() => setOpenId(null)} />
@@ -133,6 +131,7 @@ export default function App() {
         />
       )}
       </main>
+      <Dock tab={tab} onTab={go} demo={demo} busy={busy} onSync={sync} />
     </div>
   )
 }

@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import {
+  Area,
   CartesianGrid,
+  ComposedChart,
   Line,
   LineChart,
   ReferenceArea,
@@ -152,14 +154,16 @@ export function WorkoutDetail({ workout: w, plays, units, onBack }: Props) {
           <>
             <div className="chart-title"><i className="hr" aria-hidden />Heart rate (bpm)</div>
             <ResponsiveContainer width="100%" height={150}>
-              <LineChart data={data} syncId="workout" margin={{ top: 8, right: 8, bottom: 0, left: -8 }} onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
+              <ComposedChart data={data} syncId="workout" margin={{ top: 8, right: 8, bottom: 0, left: -8 }} onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
                 <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" vertical={false} />
                 {bands}
                 <XAxis dataKey="min" type="number" domain={[0, w.elapsedSec / 60]} unit=" min" {...axisProps} tickFormatter={(m) => Math.round(m).toString()} />
                 <YAxis domain={['auto', 'auto']} width={44} {...axisProps} />
                 <Tooltip content={tooltip('hr')} cursor={{ stroke: '#ff9ccb', strokeWidth: 1.5 }} />
+                <defs><linearGradient id="hrFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff2d87" stopOpacity={0.55} /><stop offset="1" stopColor="#ff2d87" stopOpacity={0} /></linearGradient></defs>
+                <Area dataKey="hr" fill="url(#hrFill)" stroke="none" animationDuration={1400} animationBegin={250} />
                 <Line dataKey="hr" stroke="#ff5aa5" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: '#fff', stroke: '#ff2d87', strokeWidth: 2 }} animationDuration={1400} animationBegin={250} animationEasing="ease-out" />
-              </LineChart>
+              </ComposedChart>
             </ResponsiveContainer>
           </>
         )}
