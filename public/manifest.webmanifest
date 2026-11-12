@@ -1,0 +1,10 @@
+{
+  "name": "Tempo",
+  "short_name": "Tempo",
+  "description": "See which songs make you faster during workouts.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#121211",
+  "theme_color": "#121211",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
