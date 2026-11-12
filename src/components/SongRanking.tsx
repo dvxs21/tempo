@@ -3,7 +3,7 @@ import { formatBpm, formatPct } from '../lib/format'
 import { songStats, type SongStat } from '../lib/stats'
 import type { Play, Sport, Workout } from '../lib/types'
 import { DivergingBar, SongArt } from './ui'
-import { Flame, HeartPulse } from 'lucide-react'
+import { Flame, HeartPulse, TrendingDown, TrendingUp } from 'lucide-react'
 
 interface Props {
   workouts: Workout[]
@@ -72,7 +72,7 @@ export function SongRanking({ workouts, plays, mode }: Props) {
                 </small>
                 {heart && s.hrChange !== undefined && (
                   <small title="Heart-rate change from start to end of the song">
-                    {s.hrChange >= 0 ? '↑' : '↓'} {Math.abs(s.hrChange).toFixed(0)} during
+                    {s.hrChange >= 0 ? <TrendingUp size={12} aria-label="rises" /> : <TrendingDown size={12} aria-label="falls" />} {Math.abs(s.hrChange).toFixed(0)} during
                   </small>
                 )}
               </div>

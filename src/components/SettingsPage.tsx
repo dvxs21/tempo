@@ -36,7 +36,7 @@ export function SettingsPage({ settings, setSettings, demo, setDemo, onError, on
   }
 
   return (
-    <div className="stagger">
+    <div>
       <div className="card" style={{ '--i': 0 } as React.CSSProperties}>
         <h2>General</h2>
         <label className="field">

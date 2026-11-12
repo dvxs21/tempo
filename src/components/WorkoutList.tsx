@@ -31,7 +31,7 @@ export function WorkoutList({ workouts, plays, units, onOpen }: Props) {
   }
 
   return (
-    <div className="stagger">
+    <div>
       {withMusic.map(({ w, songs }, i) => (
         <button
           key={w.id}

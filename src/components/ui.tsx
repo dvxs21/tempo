@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Bike, Footprints, Mountain, PersonStanding, Activity } from 'lucide-react'
+import type { Sport } from '../lib/types'
 
 /** Counts up from 0 to `to` with an ease-out curve. */
 export function useCountUp(to: number, ms = 1200, delay = 250) {
@@ -25,11 +26,19 @@ export function CountUp({ to, decimals = 0, delay }: { to: number; decimals?: nu
   const v = useCountUp(to, 1200, delay)
   return <>{v.toFixed(decimals)}</>
 }
-import type { Sport } from '../lib/types'
+
+const TILE_COLOURS = ['#0f5dac', '#e0117a', '#1d6fc4', '#08356a', '#b40e63', '#2a7fd2']
 
 export function SongArt({ src, name }: { src?: string; name: string }) {
   if (src) return <img className="art" src={src} alt="" loading="lazy" />
-  return <div className="art" aria-hidden>{name.slice(0, 1).toUpperCase()}</div>
+  let h = 0
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0
+  const bg = TILE_COLOURS[h % TILE_COLOURS.length]
+  return (
+    <div className="art" style={{ '--art-bg': bg } as React.CSSProperties} aria-hidden>
+      {name.slice(0, 1).toUpperCase()}
+    </div>
+  )
 }
 
 /** Bar growing right (pink, faster) or left (pale sky, slower) from a centre axis. */

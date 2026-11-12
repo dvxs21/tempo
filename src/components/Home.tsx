@@ -1,4 +1,4 @@
-import { ArrowRight, Flame, HeartPulse, Moon, Music2 } from 'lucide-react'
+import { Flame, HeartPulse, Moon } from 'lucide-react'
 import { segmentsFor } from '../lib/match'
 import { formatDate, formatDistance, formatDuration, formatEffort, formatPct, formatBpm, sportLabel } from '../lib/format'
 import { songStats } from '../lib/stats'
@@ -13,14 +13,6 @@ interface Props {
   onGo: (tab: 'power' | 'heart' | 'workouts' | 'settings') => void
 }
 
-function greeting() {
-  const h = new Date().getHours()
-  if (h < 5) return 'Up late'
-  if (h < 12) return 'Good morning'
-  if (h < 18) return 'Good afternoon'
-  return 'Good evening'
-}
-
 export function Home({ workouts, plays, units, onOpenWorkout, onGo }: Props) {
   const withMusic = workouts
     .map((w) => ({ w, segs: segmentsFor(w, plays) }))
@@ -30,9 +22,9 @@ export function Home({ workouts, plays, units, onOpenWorkout, onGo }: Props) {
     return (
       <div className="stagger">
         <section className="hello" style={{ '--i': 0 } as React.CSSProperties}>
-          <h1>{greeting()}</h1>
-          <p className="lede">Connect your music and Strava, go for a workout with music on, and Tempo will show you which songs make you faster.</p>
-          <button className="btn pink" onClick={() => onGo('settings')}>Connect accounts <ArrowRight size={17} aria-hidden /></button>
+          <h1>Which songs make you faster?</h1>
+          <p className="lede">Connect your music and Strava, go for a workout with music on, and Tempo lines each song up with your pace.</p>
+          <button className="btn pink" onClick={() => onGo('settings')}>Connect Spotify and Strava</button>
         </section>
       </div>
     )
@@ -55,17 +47,16 @@ export function Home({ workouts, plays, units, onOpenWorkout, onGo }: Props) {
   return (
     <div className="stagger home">
       <section className="hello" style={{ '--i': 0 } as React.CSSProperties}>
-        <h1>{greeting()}</h1>
+        <h1>{power ? <>You speed up for <span className="hot">{power.name}</span></> : 'Your workouts, song by song'}</h1>
         <p className="tally">
-          <b><CountUp to={recent.length} /></b> workouts, <b><CountUp to={songsPlayed} delay={350} /></b> songs and{' '}
-          <b><CountUp to={minutes} delay={450} /></b> minutes in the clouds these last two weeks.
+          Last two weeks: <b><CountUp to={recent.length} /></b> workouts, <b><CountUp to={songsPlayed} delay={350} /></b> songs,{' '}
+          <b><CountUp to={minutes} delay={450} /></b> minutes.
         </p>
       </section>
 
       {power && (
         <button className="card feature" style={{ '--i': 1 } as React.CSSProperties} onClick={() => onGo('power')}>
           <div className="feature-art">
-            <span className="halo" aria-hidden />
             <SongArt src={power.albumArt} name={power.name} />
           </div>
           <div className="feature-copy">
@@ -75,7 +66,7 @@ export function Home({ workouts, plays, units, onOpenWorkout, onGo }: Props) {
             <p className="big-claim">
               <b>{formatPct(power.relSpeed)}</b> faster than your average, across {power.count} plays
             </p>
-            <span className="link">All power songs <ArrowRight size={16} aria-hidden /></span>
+            <span className="link">Compare all your songs</span>
           </div>
         </button>
       )}
@@ -100,7 +91,7 @@ export function Home({ workouts, plays, units, onOpenWorkout, onGo }: Props) {
           <div className="stat"><b>{formatEffort(latest.w.avgSpeed, latest.w.sport, units)}</b><span>average</span></div>
           <div className="stat"><b>{latest.segs.length}</b><span>songs</span></div>
         </div>
-        <span className="link">See the full timeline <ArrowRight size={16} aria-hidden /></span>
+        <span className="link">Open the pace timeline</span>
       </button>
 
       {(pump || calm) && (
@@ -129,9 +120,7 @@ export function Home({ workouts, plays, units, onOpenWorkout, onGo }: Props) {
       )}
 
       <button className="card wide-link" style={{ '--i': 4 } as React.CSSProperties} onClick={() => onGo('workouts')}>
-        <Music2 size={18} aria-hidden />
-        All {withMusic.length} workouts with music
-        <ArrowRight size={18} aria-hidden />
+        Browse all {withMusic.length} workouts with music
       </button>
     </div>
   )

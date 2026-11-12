@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AlertCircle, Settings2, Sparkles } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Settings2 } from 'lucide-react'
 import { Landscape } from './components/Landscape'
 import { Equalizer } from './components/ui'
 import { Dock, type Tab } from './components/Dock'
@@ -91,7 +91,7 @@ export default function App() {
         <button className="logo" onClick={() => go('home')} aria-label="Tempo home"><Equalizer />Tempo</button>
         {demo && (
           <button className="chip" onClick={() => go('settings')} title="Connect your accounts to see your own workouts">
-            <Sparkles size={14} aria-hidden />Demo data
+            Demo data
           </button>
         )}
         <button className={`icon-btn ${tab === 'settings' ? 'active' : ''}`} onClick={() => go('settings')} aria-label="Settings">
@@ -100,7 +100,7 @@ export default function App() {
       </header>
 
       {error && <div className="error" role="alert"><AlertCircle size={18} aria-hidden />{error}</div>}
-      {message && <div className="banner" role="status"><Sparkles size={18} aria-hidden />{message}</div>}
+      {message && <div className="banner" role="status"><CheckCircle2 size={18} aria-hidden />{message}</div>}
 
       <main className="view" key={`${tab}-${openId ?? ''}-${demo}`}>
       {tab === 'home' && (
